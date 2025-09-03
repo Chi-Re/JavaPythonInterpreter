@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 public class PyList {
     private final List<Object> data;
 
+    private String test_date = "s";
+
     // 构造方法
     public PyList() {
         this.data = new ArrayList<>();

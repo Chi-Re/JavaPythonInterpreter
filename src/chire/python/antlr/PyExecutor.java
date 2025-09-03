@@ -248,13 +248,13 @@ public class PyExecutor {
         }
     }
 
-    public static class SubFunPy implements PyInstruction {
+    public static class SubCallPy implements PyInstruction {
 
         public final PyInstruction key;
 
         public final PyInstruction build;
 
-        public SubFunPy(PyInstruction key, PyInstruction build) {
+        public SubCallPy(PyInstruction key, PyInstruction build) {
             this.key = key;
             this.build = build;
         }
@@ -277,6 +277,35 @@ public class PyExecutor {
             } else if (this.build instanceof VarCallPy) {
                 try {
                     return VarCallHandle.accessVariable(key, ((VarCallPy) build).name);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                throw new RuntimeException("not hava key");
+            }
+        }
+    }
+
+    public static class SubSetPy implements PyInstruction {
+        public final PyInstruction key;
+        public final PyInstruction build;
+        public final PyInstruction call;
+
+        public SubSetPy(PyInstruction key, PyInstruction build, PyInstruction call) {
+            this.key = key;
+            this.build = build;
+            this.call = call;
+        }
+
+        @Override
+        public Object run(PyExecutor exec) {
+            var key = this.key.run(exec);
+            if (this.build instanceof FunCallPy) {
+                throw  new RuntimeException("not can key");
+            } else if (this.build instanceof VarCallPy) {
+                try {
+                    VarCallHandle.modifyVariable(key, ((VarCallPy) build).name, call.run(exec));
+                    return null;
                 } catch (Throwable e) {
                     throw new RuntimeException(e);
                 }

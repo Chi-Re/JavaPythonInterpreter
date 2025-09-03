@@ -163,25 +163,25 @@ public abstract class PyStatement {
         }
     }
 
-    public static class SubFunStatement extends PyStatement{
+    public static class SubCallStatement extends PyStatement{
 
         public final PyStatement key;
 
         public final PyStatement call;
 
-        public SubFunStatement(PyStatement var, PyStatement call) {
+        public SubCallStatement(PyStatement var, PyStatement call) {
             this.key = var;
             this.call = call;
         }
 
         @Override
         public PyExecutor.PyInstruction build(PyAssembler builder) {
-            return new PyExecutor.SubFunPy(this.key.build(builder), this.call.build(builder));
+            return new PyExecutor.SubCallPy(this.key.build(builder), this.call.build(builder));
         }
 
         @Override
         public void toString(SmartIndenter indenter) {
-            indenter.newLine().add("SubFunCall{")
+            indenter.newLine().add("SubCall{")
                     .indent()
                     .newLine().add("key:").indent();
             key.toString(indenter);
@@ -189,6 +189,44 @@ public abstract class PyStatement {
             indenter.unindent().newLine().add("call:").indent();
 
             call.toString(indenter);
+
+            indenter.unindent().newLine().unindent().add("}");
+        }
+    }
+
+    public static class SubSetStatement extends PyStatement{
+
+        public final PyStatement key;
+
+        public final PyStatement call;
+
+        public final PyStatement var;
+
+        public SubSetStatement(PyStatement key, PyStatement call, PyStatement var) {
+            this.key = key;
+            this.call = call;
+            this.var = var;
+        }
+
+        @Override
+        public PyExecutor.PyInstruction build(PyAssembler builder) {
+            return new PyExecutor.SubSetPy(key.build(builder), call.build(builder), var.build(builder));
+        }
+
+        @Override
+        public void toString(SmartIndenter indenter) {
+            indenter.newLine().add("SubSet{")
+                    .indent()
+                    .newLine().add("key:").indent();
+            key.toString(indenter);
+
+            indenter.unindent().newLine().add("call:").indent();
+
+            call.toString(indenter);
+
+            indenter.unindent().newLine().add("var:").indent();
+
+            var.toString(indenter);
 
             indenter.unindent().newLine().unindent().add("}");
         }

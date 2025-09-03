@@ -29,8 +29,11 @@ public class PythonInterpreter {
                 
                 a.append(9)
                 
+                a.test_date = "eeee"
+                
                 print(a)
                 print(a.data.size())
+                print(a.test_date)
                 """;
 
         // 创建词法分析器和语法分析器
@@ -89,6 +92,5 @@ public class PythonInterpreter {
 //        set result 0
 //        wait 0.5
 //        op add result a b
-
     }
 }

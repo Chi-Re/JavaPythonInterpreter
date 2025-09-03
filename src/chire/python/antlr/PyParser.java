@@ -85,13 +85,18 @@ public class PyParser {
             call = varCall();
         }
 
+        if (match(current+1, 63)) {
+            current++;
+            return new PyStatement.SubSetStatement(var, call, assignment(1));
+        }
+
         if (last().getType() == 54) {
             return submethodCall(
-                    new PyStatement.SubFunStatement(var, call)
+                    new PyStatement.SubCallStatement(var, call)
             );
         }
 
-        return new PyStatement.SubFunStatement(var, call);
+        return new PyStatement.SubCallStatement(var, call);
     }
 
     private ArrayList<PyStatement> bodyDeclaration(){
