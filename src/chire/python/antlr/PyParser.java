@@ -66,6 +66,10 @@ public class PyParser {
                     statements.add(whileDeclaration());
                     break;
 
+                case 13:
+                    statements.add(classDeclaration(1));
+                    break;
+
                 default:
                     break;
             }
@@ -132,6 +136,42 @@ public class PyParser {
         }
 
         return body;
+    }
+
+    private PyStatement classDeclaration(){
+        return classDeclaration(0);
+    }
+
+    private PyStatement classDeclaration(int cur){
+        this.current += cur;
+
+        Token class_token = peek();
+
+        if (class_token.getType() != 45) throw new RuntimeException("no 45 key");
+
+        ArrayList<PyStatement> body = new ArrayList<>();
+
+        while (!isEnd()) {
+            current++;
+
+            Token key = peek();
+
+            switch (key.getType()) {
+                case 1://"    "
+                case 44:
+                case 60:
+                    break;
+
+                case 45, 25, 41, 15:
+                    body.addAll(bodyDeclaration());
+                    break;
+
+                case 2:
+                    return new PyStatement.ClassStatement(class_token, body);
+            }
+        }
+
+        return null;
     }
 
     private PyStatement whileDeclaration(){

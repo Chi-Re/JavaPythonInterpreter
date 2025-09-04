@@ -87,6 +87,23 @@ public class PyExecutor {
         }
     }
 
+    public static class ClassPy implements PyInstruction{
+        public final String name;
+        public final Class<?> paternal;
+        public final ArrayList<PyInstruction> body;
+
+        public ClassPy(String name, Class<?> paternal, ArrayList<PyInstruction> body){
+            this.name = name;
+            this.paternal = paternal;
+            this.body = body;
+        }
+
+        @Override
+        public Object run(PyExecutor exec) {
+            return null;
+        }
+    }
+
     public static class FunPy implements PyInstruction{
 
         public final String name;
@@ -244,6 +261,13 @@ public class PyExecutor {
                 valid = holds.run(exec);
             }
 
+            return null;
+        }
+    }
+
+    public static class PassPy implements PyInstruction {
+        @Override
+        public Object run(PyExecutor exec) {
             return null;
         }
     }

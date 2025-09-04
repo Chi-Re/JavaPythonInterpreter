@@ -25,15 +25,18 @@ public class PythonInterpreter {
         // 71 +
         // 73 /
         String pythonCode = """
-                a = [1, 2, 3]
+                class Test:
+                    def __init__(self):
+                        pass
                 
-                a.append(9)
+                    def te1(self):
+                        pass
                 
-                a.test_date = "eeee"
+                    def te2(self, text):
+                        return text + "ssssss"
                 
-                print(a)
-                print(a.data.size())
-                print(a.test_date)
+                    def te3(self):
+                        print("ppppppp")
                 """;
 
         // 创建词法分析器和语法分析器

@@ -62,6 +62,50 @@ public abstract class PyStatement {
         }
     }
 
+    public static class ClassStatement extends PyStatement{
+        public final Token name;
+        public final PyStatement paternal;
+        public final ArrayList<PyStatement> body;
+
+        public ClassStatement(Token name, PyStatement paternal, ArrayList<PyStatement> body){
+            this.name = name;
+            this.paternal = paternal;
+            this.body = body;
+        }
+
+        public ClassStatement(Token name, ArrayList<PyStatement> body){
+            this(name,null,body);
+        }
+
+        @Override
+        public PyExecutor.PyInstruction build(PyAssembler builder) {
+            ArrayList<PyExecutor.PyInstruction> body = new ArrayList<>();
+
+            for (PyStatement statement : this.body) {
+                body.add(statement.build(builder));
+            }
+
+            return new PyExecutor.ClassPy(name.getText(),
+                    paternal == null ? Object.class : paternal.build(builder).getClass(), body);
+        }
+
+        @Override
+        public void toString(SmartIndenter indenter) {
+            indenter.newLine().add("Class{").newLine()
+                    .indent()
+                    .add("name=").add(name.getText()).newLine()
+                    .add("paternal:").add(paternal == null ? "obj" : paternal.toString()).newLine()
+                    .add("body:").indent();
+
+            for (PyStatement statement : this.body) {
+                statement.toString(indenter);
+            }
+
+            indenter.unindent().newLine().unindent()
+                    .add("}");
+        }
+    }
+
     public static class FunStatement extends PyStatement{
 
         public final Token token;
@@ -97,13 +141,13 @@ public abstract class PyStatement {
             indenter.newLine().addLine("Fun{")
                     .indent()
                     .add("token=").addLine(token.getText())
-                    .add("args=");
+                    .add("args=[").indent();
 
             for (ArgStatement arg : args) {
                 arg.toString(indenter);
             }
 
-            indenter.newLine()
+            indenter.newLine().unindent().add("]").newLine()
                     .add("stmts=[")
                     .indent();
 
@@ -160,6 +204,18 @@ public abstract class PyStatement {
                     .addLine("]")
                     .unindent()
                     .add("}");
+        }
+    }
+
+    public static class PassStatement extends PyStatement{
+        @Override
+        public PyExecutor.PyInstruction build(PyAssembler builder) {
+            return new PyExecutor.PassPy();
+        }
+
+        @Override
+        public void toString(SmartIndenter indenter) {
+            indenter.newLine().add("PassPy{}");
         }
     }
 
