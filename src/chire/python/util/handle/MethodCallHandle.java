@@ -16,28 +16,30 @@ public class MethodCallHandle {
      * @return 方法调用的结果
      */
     public static Object callMethod(Object target, String methodName, Object... args) throws Throwable {
-        // 获取方法参数类型
-        Class<?>[] paramTypes = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            paramTypes[i] = (args[i] != null) ? args[i].getClass() : Object.class;
-        }
+        return target.getClass().getMethod(methodName).invoke(target, args);
 
-        // 获取 MethodHandles.Lookup
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-        // 创建方法类型
-        MethodType methodType = MethodType.methodType(void.class, paramTypes);
-
-        try {
-            // 尝试查找方法
-            MethodHandle handle = lookup.findVirtual(target.getClass(), methodName, methodType);
-
-            // 调用方法
-            return handle.invokeWithArguments(prependTarget(target, args));
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            // 尝试使用 Object 类型参数
-            return fallbackMethodCall(target, methodName, args);
-        }
+//        // 获取方法参数类型
+//        Class<?>[] paramTypes = new Class<?>[args.length];
+//        for (int i = 0; i < args.length; i++) {
+//            paramTypes[i] = (args[i] != null) ? args[i].getClass() : Object.class;
+//        }
+//
+//        // 获取 MethodHandles.Lookup
+//        MethodHandles.Lookup lookup = MethodHandles.lookup();
+//
+//        // 创建方法类型
+//        MethodType methodType = MethodType.methodType(void.class, paramTypes);
+//
+//        try {
+//            // 尝试查找方法
+//            MethodHandle handle = lookup.findVirtual(target.getClass(), methodName, methodType);
+//
+//            // 调用方法
+//            return handle.invokeWithArguments(prependTarget(target, args));
+//        } catch (NoSuchMethodException | IllegalAccessException e) {
+//            // 尝试使用 Object 类型参数
+//            return fallbackMethodCall(target, methodName, args);
+//        }
     }
 
     /**

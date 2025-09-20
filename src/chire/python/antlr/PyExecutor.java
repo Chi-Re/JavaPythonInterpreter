@@ -1,14 +1,16 @@
 package chire.python.antlr;
 
+import chire.python.py.PyDict;
 import chire.python.py.PyList;
 import chire.python.util.handle.MethodCallHandle;
+import chire.python.util.handle.SubClass;
 import chire.python.util.handle.VarCallHandle;
 import chire.python.util.type.NumberComparator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class PyExecutor {
 
@@ -100,6 +102,50 @@ public class PyExecutor {
 
         @Override
         public Object run(PyExecutor exec) {
+            var subclass = new SubClass(name, paternal);
+            var execLocal = new PyClassExecutor(subclass);
+
+            execLocal.setGlobal(exec);
+
+            for (int i = 0; i < this.body.size(); i++) {
+                var b = body.get(i);
+
+                if (b instanceof FunPy) {
+                    ArrayList<Class<?>> argType =  new ArrayList<>();
+
+                    var args = ((FunPy) b).args;
+                    if (!args.isEmpty()) args.remove(0);
+
+                    for (ArgPy arg : args) {
+                        argType.add(arg.type);
+                    }
+
+                    subclass.addMethod(((FunPy) b).name, Object.class, argType.toArray(new Class<?>[]{}), arg -> {
+                        return ((PyCallable) b.run(execLocal)).call(execLocal, arg);
+                    });
+                } else if (b instanceof VarPy) {
+                    execLocal.setVar(((VarPy) b).name, b.run(execLocal));
+                } else if (b instanceof ClassPy) {
+                    execLocal.setVar(((ClassPy) b).name, b.run(execLocal));
+                } else {
+                    throw new RuntimeException("not key has");
+                }
+            }
+
+            exec.setVar(name, new PyCallable() {
+                @Override
+                public Object call(PyExecutor exec, ArrayList<PyInstruction> arguments) {
+                    subclass.create();
+                    return subclass.newInstance();
+                }
+
+                @Override
+                public Object call(PyExecutor exec, Object[] arguments) {
+                    subclass.create();
+                    return subclass.newInstance();
+                }
+            });
+
             return null;
         }
     }
@@ -133,6 +179,25 @@ public class PyExecutor {
                         execLocal.setVar(args.get(i).name, arguments.get(i).run(exec));
                     }
 
+                    return getReturn(execLocal);
+                }
+
+                @Override
+                public Object call(PyExecutor exec, Object[] arguments) {
+                    PyExecutor execLocal = new PyExecutor();
+
+                    execLocal.setGlobal(exec);
+
+                    if (arguments.length != args.size()) throw new RuntimeException("all args");
+
+                    for (int i = 0; i < arguments.length; i++) {
+                        execLocal.setVar(args.get(i).name, arguments[i]);
+                    }
+
+                    return getReturn(execLocal);
+                }
+
+                public Object getReturn(PyExecutor execLocal){
                     Object returnObj = null;
 
                     for (PyInstruction instruction : instructions) {
@@ -325,7 +390,7 @@ public class PyExecutor {
         public Object run(PyExecutor exec) {
             var key = this.key.run(exec);
             if (this.build instanceof FunCallPy) {
-                throw  new RuntimeException("not can key");
+                throw new RuntimeException("not can key");
             } else if (this.build instanceof VarCallPy) {
                 try {
                     VarCallHandle.modifyVariable(key, ((VarCallPy) build).name, call.run(exec));

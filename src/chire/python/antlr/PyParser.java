@@ -119,6 +119,8 @@ public class PyParser {
                     body.add(varDeclaration());
                 } else if (match(current+1, 57)){
                     body.add(methodCall());
+                }else if (match(current+1, 54)) {
+                    body.add(submethodCall(varCall()));
                 }
                 break;
 

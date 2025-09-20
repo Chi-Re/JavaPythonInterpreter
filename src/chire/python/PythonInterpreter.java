@@ -26,17 +26,14 @@ public class PythonInterpreter {
         // 73 /
         String pythonCode = """
                 class Test:
-                    def __init__(self):
-                        pass
-                
-                    def te1(self):
-                        pass
-                
-                    def te2(self, text):
-                        return text + "ssssss"
+                    a = 2
                 
                     def te3(self):
                         print("ppppppp")
+                
+                test = Test()
+                test.te3()
+                print(test.a)
                 """;
 
         // 创建词法分析器和语法分析器
@@ -61,23 +58,26 @@ public class PythonInterpreter {
 
         PyExecutor executor = new PyExecutor();
 
-        executor.setVar("print", (PyCallable) (exec, arguments) -> {
-            for (PyExecutor.PyInstruction argument : arguments) {
-                System.out.print(argument.run(exec));
-            }
-            System.out.print("\n");
+        executor.setVar("print", new PyCallable() {
+            @Override
+            public Object call(PyExecutor exec, ArrayList<PyExecutor.PyInstruction> arguments) {
+                for (PyExecutor.PyInstruction argument : arguments) {
+                    System.out.print(argument.run(exec));
+                }
+                System.out.print("\n");
 
-            return null;
-        });
-
-        executor.setVar("test", (PyCallable) (exec, arguments) -> {
-            StringBuilder r = new StringBuilder();
-
-            for (PyExecutor.PyInstruction argument : arguments) {
-                r.append("get [").append(argument.run(exec)).append("] it");
+                return null;
             }
 
-            return r.toString();
+            @Override
+            public Object call(PyExecutor exec, Object[] arguments) {
+                for (var argument : arguments) {
+                    System.out.print(argument);
+                }
+                System.out.print("\n");
+
+                return null;
+            }
         });
 
         for (PyExecutor.PyInstruction instruction : instructions) {
