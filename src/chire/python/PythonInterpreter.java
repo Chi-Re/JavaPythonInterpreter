@@ -29,6 +29,7 @@ public class PythonInterpreter {
                     a = 2
                 
                     def te3(self):
+                        self.a = 3
                         print("ppppppp")
                 
                 test = Test()

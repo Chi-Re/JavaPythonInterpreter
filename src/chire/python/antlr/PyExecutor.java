@@ -114,7 +114,6 @@ public class PyExecutor {
                     ArrayList<Class<?>> argType =  new ArrayList<>();
 
                     var args = ((FunPy) b).args;
-                    if (!args.isEmpty()) args.remove(0);
 
                     for (ArgPy arg : args) {
                         argType.add(arg.type);
@@ -353,6 +352,8 @@ public class PyExecutor {
             var key = this.key.run(exec);
             if (this.build instanceof FunCallPy) {
                 ArrayList<Object> args = new ArrayList<>();
+
+                args.add(key);
 
                 for (PyInstruction instruction : ((FunCallPy) build).instructions) {
                     args.add(instruction.run(exec));
