@@ -2,6 +2,7 @@ package chire.python.antlr;
 
 import chire.python.py.PyDict;
 import chire.python.py.PyList;
+import chire.python.py.base.PyObject;
 import chire.python.util.type.TypeChecker;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -20,7 +21,7 @@ public class PyParser {
     private static HashMap<String, Class<?>> keyMap = new HashMap<>();
 
     static {
-        keyMap.put("object", Object.class);
+        keyMap.put("object", PyObject.class);
         keyMap.put("float", Float.class);
         keyMap.put("int", Integer.class);
         keyMap.put("str", String.class);

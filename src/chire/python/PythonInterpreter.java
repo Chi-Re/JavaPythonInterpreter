@@ -28,9 +28,11 @@ public class PythonInterpreter {
                 class Test:
                     a = 2
                 
+                    def __init__(self):
+                        print("aaaaa")
+                
                     def te3(self):
-                        self.a = 3
-                        print("ppppppp")
+                        self.a = 1
                 
                 test = Test()
                 test.te3()

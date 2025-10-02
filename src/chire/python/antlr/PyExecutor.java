@@ -2,6 +2,7 @@ package chire.python.antlr;
 
 import chire.python.py.PyDict;
 import chire.python.py.PyList;
+import chire.python.py.base.PyObject;
 import chire.python.util.handle.MethodCallHandle;
 import chire.python.util.handle.SubClass;
 import chire.python.util.handle.VarCallHandle;
@@ -119,11 +120,17 @@ public class PyExecutor {
                         argType.add(arg.type);
                     }
 
-                    subclass.addMethod(((FunPy) b).name, Object.class, argType.toArray(new Class<?>[]{}), arg -> {
-                        return ((PyCallable) b.run(execLocal)).call(execLocal, arg);
-                    });
+                    if (Objects.equals(((FunPy) b).name, "__init__")) {
+                        subclass.addConstructor(argType.toArray(new Class[]{}), arg -> {
+                            return ((PyCallable) b.run(execLocal)).call(execLocal, arg);
+                        });
+                    } else {
+                        subclass.addMethod(((FunPy) b).name, Object.class, argType.toArray(new Class<?>[]{}), arg -> {
+                            return ((PyCallable) b.run(execLocal)).call(execLocal, arg);
+                        });
+                    }
                 } else if (b instanceof VarPy) {
-                    execLocal.setVar(((VarPy) b).name, b.run(execLocal));
+                    execLocal.setVar(((VarPy) b).name, ((VarPy) b).value.run(exec));
                 } else if (b instanceof ClassPy) {
                     execLocal.setVar(((ClassPy) b).name, b.run(execLocal));
                 } else {
@@ -134,14 +141,24 @@ public class PyExecutor {
             exec.setVar(name, new PyCallable() {
                 @Override
                 public Object call(PyExecutor exec, ArrayList<PyInstruction> arguments) {
-                    subclass.create();
-                    return subclass.newInstance();
+                    Map<Class<?>, Object> args = new HashMap<>();
+
+                    for (PyInstruction arg : arguments) {
+                        args.put(arg.run(exec).getClass(), arg.run(exec));
+                    }
+
+                    return subclass.newInstance(new Object[]{});
                 }
 
                 @Override
                 public Object call(PyExecutor exec, Object[] arguments) {
-                    subclass.create();
-                    return subclass.newInstance();
+                    Map<Class<?>, Object> args = new HashMap<>();
+
+                    for (Object arg : arguments) {
+                        args.put(arg.getClass(), arg);
+                    }
+
+                    return subclass.newInstance(new Object[]{});
                 }
             });
 
@@ -353,7 +370,7 @@ public class PyExecutor {
             if (this.build instanceof FunCallPy) {
                 ArrayList<Object> args = new ArrayList<>();
 
-                args.add(key);
+                if (key instanceof PyObject) args.add(key);
 
                 for (PyInstruction instruction : ((FunCallPy) build).instructions) {
                     args.add(instruction.run(exec));

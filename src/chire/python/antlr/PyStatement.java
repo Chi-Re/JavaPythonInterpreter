@@ -1,5 +1,6 @@
 package chire.python.antlr;
 
+import chire.python.py.base.PyObject;
 import chire.python.util.type.RemoveQuotes;
 import chire.python.util.SmartIndenter;
 import org.antlr.v4.runtime.Token;
@@ -86,7 +87,7 @@ public abstract class PyStatement {
             }
 
             return new PyExecutor.ClassPy(name.getText(),
-                    paternal == null ? Object.class : paternal.build(builder).getClass(), body);
+                    paternal == null ? PyObject.class : paternal.build(builder).getClass(), body);
         }
 
         @Override
