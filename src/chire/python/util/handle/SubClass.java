@@ -1,31 +1,24 @@
 package chire.python.util.handle;
 
-import chire.python.util.Test;
+import chire.python.antlr.callable.PyFunction;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
-import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.SuperMethodCall;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.FieldValue;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.This;
-import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
-import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -71,15 +64,15 @@ public class SubClass {
     }
 
     public static class ConstructorInterceptor {
-        private final Function<Object[], Object> call;
+        private final PyFunction<Object[], Object> call;
 
-        public ConstructorInterceptor(Function<Object[], Object> call) {
+        public ConstructorInterceptor(PyFunction<Object[], Object> call) {
             this.call = call;
         }
 
         @RuntimeType
-        public Object intercept(@AllArguments Object[] args) {
-            return call.apply(args != null ? args : new Object[0]);
+        public void intercept(@This Object self, @AllArguments Object[] args) {
+            call.apply(self, args);
         }
     }
 
@@ -129,14 +122,22 @@ public class SubClass {
     /**
      * 添加或覆盖构造函数
      */
-    public void addConstructor(Class<?>[] parameterTypes, Function<Object[], Object> constructorLogic) {
+    public void addConstructor(Class<?>[] parameterTypes, PyFunction<Object[], Object> constructorLogic) {
         try {
-            builder = builder.defineConstructor(Modifier.PUBLIC)
-                    .withParameters(parameterTypes)
-                    .intercept(
-                            MethodCall.invoke(superType.getConstructor())
-                                    .andThen(MethodDelegation.to(new ConstructorInterceptor(constructorLogic)))
-                    );
+            if (parameterTypes.length != 0) {
+                builder = builder.defineConstructor(Modifier.PUBLIC)
+                        .withParameters(parameterTypes)
+                        .intercept(
+                                MethodCall.invoke(superType.getConstructor())
+                                        .andThen(MethodDelegation.to(new ConstructorInterceptor(constructorLogic)))
+                        );
+            } else {
+                builder = builder.constructor(ElementMatchers.isConstructor())
+                        .intercept(
+                                MethodCall.invoke(superType.getConstructor())
+                                        .andThen(MethodDelegation.to(new ConstructorInterceptor(constructorLogic)))
+                        );
+            }
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -174,24 +175,36 @@ public class SubClass {
         }
 
         try {
-            // 查找匹配的构造函数
-            Constructor<?> matchedConstructor;
-            Class<?>[] parameterTypes = Arrays.stream(constructorArgs).filter(Objects::nonNull).map(Object::getClass).toArray(Class<?>[]::new);
+            // 检查是否所有参数都为null，如果是则使用无参构造
+            boolean allNull = Arrays.stream(constructorArgs).allMatch(Objects::isNull);
 
-            // 根据参数类型查找构造函数
-            if (parameterTypes.length == 0) {
+            Constructor<?> matchedConstructor;
+            Object[] actualArgs;
+
+            if (allNull || constructorArgs.length == 0) {
                 matchedConstructor = generatedClass.getDeclaredConstructor();
+                actualArgs = new Object[0];
             } else {
+                // 处理包含null的参数
+                Class<?>[] parameterTypes = new Class<?>[constructorArgs.length];
+                actualArgs = new Object[constructorArgs.length];
+
+                for (int i = 0; i < constructorArgs.length; i++) {
+                    if (constructorArgs[i] != null) {
+                        parameterTypes[i] = constructorArgs[i].getClass();
+                        actualArgs[i] = constructorArgs[i];
+                    } else {
+                        // 对于null参数，使用Object.class作为类型
+                        parameterTypes[i] = Object.class;
+                        actualArgs[i] = null;
+                    }
+                }
+
                 matchedConstructor = generatedClass.getDeclaredConstructor(parameterTypes);
             }
 
             // 创建实例
-            Object instance;
-            if (parameterTypes.length == 0) {
-                instance = matchedConstructor.newInstance();
-            } else {
-                instance = matchedConstructor.newInstance(constructorArgs);
-            }
+            Object instance = matchedConstructor.newInstance(actualArgs);
 
             // 设置变量值
             for (var name : variables.keySet()) {

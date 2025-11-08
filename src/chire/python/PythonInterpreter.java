@@ -3,16 +3,13 @@ package chire.python;
 import chire.antlr.Python3Lexer;
 import chire.antlr.Python3Parser;
 import chire.python.antlr.*;
-import chire.python.py.PyList;
+import chire.python.antlr.callable.PyCallable;
 import chire.python.util.SmartIndenter;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PythonInterpreter {
     public static void main(String[] args) {
@@ -29,13 +26,13 @@ public class PythonInterpreter {
                     a = 2
                 
                     def __init__(self):
+                        self.a = 3
                         print("aaaaa")
                 
-                    def te3(self):
-                        self.a = 1
+                    def te3(self, key):
+                        self.a = key
                 
                 test = Test()
-                test.te3()
                 print(test.a)
                 """;
 
@@ -61,26 +58,13 @@ public class PythonInterpreter {
 
         PyExecutor executor = new PyExecutor();
 
-        executor.setVar("print", new PyCallable() {
-            @Override
-            public Object call(PyExecutor exec, ArrayList<PyExecutor.PyInstruction> arguments) {
-                for (PyExecutor.PyInstruction argument : arguments) {
-                    System.out.print(argument.run(exec));
-                }
-                System.out.print("\n");
-
-                return null;
+        executor.setVar("print", (PyCallable) (exec, self, arguments) -> {
+            for (var argument : arguments) {
+                System.out.print(argument);
             }
+            System.out.print("\n");
 
-            @Override
-            public Object call(PyExecutor exec, Object[] arguments) {
-                for (var argument : arguments) {
-                    System.out.print(argument);
-                }
-                System.out.print("\n");
-
-                return null;
-            }
+            return null;
         });
 
         for (PyExecutor.PyInstruction instruction : instructions) {

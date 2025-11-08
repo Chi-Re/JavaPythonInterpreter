@@ -21,15 +21,14 @@ public class Test {
     public static void main(String[] args) throws Exception {
         Class<?> dynamicClass = new ByteBuddy()
                 .subclass(Greeter.class)
-                .defineConstructor(Modifier.PUBLIC)
-                .withParameters(String.class)
+                .constructor(ElementMatchers.isConstructor())
                 .intercept(MethodCall.invoke(Greeter.class.getConstructor())
                         .andThen(MethodDelegation.to(new ParameterInterceptor())))
                 .make()
                 .load(Test.class.getClassLoader())
                 .getLoaded();
 
-        dynamicClass.getDeclaredConstructor(String.class).newInstance("aaa");
+        dynamicClass.getDeclaredConstructor().newInstance();
     }
 
     public static class ParameterInterceptor {

@@ -1,6 +1,6 @@
 package chire.python.antlr;
 
-import chire.python.py.PyDict;
+import chire.python.antlr.callable.PyCallable;
 import chire.python.py.PyList;
 import chire.python.py.base.PyObject;
 import chire.python.util.handle.MethodCallHandle;
@@ -8,10 +8,7 @@ import chire.python.util.handle.SubClass;
 import chire.python.util.handle.VarCallHandle;
 import chire.python.util.type.NumberComparator;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class PyExecutor {
 
@@ -121,8 +118,9 @@ public class PyExecutor {
                     }
 
                     if (Objects.equals(((FunPy) b).name, "__init__")) {
-                        subclass.addConstructor(argType.toArray(new Class[]{}), arg -> {
-                            return ((PyCallable) b.run(execLocal)).call(execLocal, arg);
+                        argType.remove(0);
+                        subclass.addConstructor(argType.toArray(new Class[]{}), (self, arg) -> {
+                            return ((PyCallable) b.run(execLocal)).call(execLocal, self, arg);
                         });
                     } else {
                         subclass.addMethod(((FunPy) b).name, Object.class, argType.toArray(new Class<?>[]{}), arg -> {
@@ -138,28 +136,8 @@ public class PyExecutor {
                 }
             }
 
-            exec.setVar(name, new PyCallable() {
-                @Override
-                public Object call(PyExecutor exec, ArrayList<PyInstruction> arguments) {
-                    Map<Class<?>, Object> args = new HashMap<>();
-
-                    for (PyInstruction arg : arguments) {
-                        args.put(arg.run(exec).getClass(), arg.run(exec));
-                    }
-
-                    return subclass.newInstance(new Object[]{});
-                }
-
-                @Override
-                public Object call(PyExecutor exec, Object[] arguments) {
-                    Map<Class<?>, Object> args = new HashMap<>();
-
-                    for (Object arg : arguments) {
-                        args.put(arg.getClass(), arg);
-                    }
-
-                    return subclass.newInstance(new Object[]{});
-                }
+            exec.setVar(name, (PyCallable) (exec1, self, arguments) -> {
+                return subclass.newInstance(arguments);
             });
 
             return null;
@@ -184,27 +162,19 @@ public class PyExecutor {
         public Object run(PyExecutor exec) {
             var call = new PyCallable() {
                 @Override
-                public Object call(PyExecutor exec, ArrayList<PyInstruction> arguments) {
+                public Object call(PyExecutor exec, Object self, Object[] arguments) {
                     PyExecutor execLocal = new PyExecutor();
 
                     execLocal.setGlobal(exec);
 
-                    if (arguments.size() != args.size()) throw new RuntimeException("all args");
-
-                    for (int i = 0; i < arguments.size(); i++) {
-                        execLocal.setVar(args.get(i).name, arguments.get(i).run(exec));
+                    if (self != null) {
+                        execLocal.setVar(args.get(0).name, self);
+                        args.remove(0);
                     }
 
-                    return getReturn(execLocal);
-                }
-
-                @Override
-                public Object call(PyExecutor exec, Object[] arguments) {
-                    PyExecutor execLocal = new PyExecutor();
-
-                    execLocal.setGlobal(exec);
-
-                    if (arguments.length != args.size()) throw new RuntimeException("all args");
+                    if (arguments.length != args.size()) {
+                        throw new RuntimeException("all args");
+                    }
 
                     for (int i = 0; i < arguments.length; i++) {
                         execLocal.setVar(args.get(i).name, arguments[i]);
@@ -369,8 +339,6 @@ public class PyExecutor {
             var key = this.key.run(exec);
             if (this.build instanceof FunCallPy) {
                 ArrayList<Object> args = new ArrayList<>();
-
-                if (key instanceof PyObject) args.add(key);
 
                 for (PyInstruction instruction : ((FunCallPy) build).instructions) {
                     args.add(instruction.run(exec));
