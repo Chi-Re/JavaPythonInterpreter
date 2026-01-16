@@ -1,7 +1,5 @@
 package chire.python.antlr;
 
-import java.util.ArrayList;
-
 public class SelfNull {
     public final String name;
 

@@ -2,7 +2,10 @@ package chire.python;
 
 import chire.antlr.Python3Lexer;
 import chire.antlr.Python3Parser;
-import chire.python.antlr.*;
+import chire.python.antlr.PyAssembler;
+import chire.python.antlr.PyExecutor;
+import chire.python.antlr.PyParser;
+import chire.python.antlr.PyStatement;
 import chire.python.antlr.callable.PyCallable;
 import chire.python.util.SmartIndenter;
 import org.antlr.v4.runtime.CharStream;
@@ -22,19 +25,8 @@ public class PythonInterpreter {
         // 71 +
         // 73 /
         String pythonCode = """
-                class Test:
-                    a = 2
-                
-                    def __init__(self):
-                        self.a = 7
-                        print("aaaaa")
-                
-                    def te3(self, key):
-                        self.a = key
-                
-                test = Test()
-                test.te3(9)
-                print(test.a)
+                a = 1
+                b = 4
                 """;
 
         // 创建词法分析器和语法分析器

@@ -1,7 +1,6 @@
 package chire.python.antlr;
 
 import chire.python.util.handle.SubClass;
-import chire.python.util.handle.VarCallHandle;
 
 public class PyClassExecutor extends PyExecutor {
     private SubClass subclass;

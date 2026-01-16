@@ -1,0 +1,24 @@
+project.ext.mainClassName = 'chire.python.PythonInterpreter'
+
+tasks.register('run', JavaExec) {
+    dependsOn classes
+    mainClass = mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+}
+
+tasks.register('dist', Jar) {
+    dependsOn configurations.runtimeClasspath
+
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+    from {configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }}
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveFileName = "${rootProject.name}.jar"
+
+    manifest{
+        attributes 'Main-Class': mainClassName
+    }
+}

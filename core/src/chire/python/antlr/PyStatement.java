@@ -1,8 +1,8 @@
 package chire.python.antlr;
 
 import chire.python.py.base.PyObject;
-import chire.python.util.type.RemoveQuotes;
 import chire.python.util.SmartIndenter;
+import chire.python.util.type.RemoveQuotes;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public abstract class PyStatement {
             ArrayList<PyExecutor.ArgPy> instArgs = new ArrayList<>();
             ArrayList<PyExecutor.PyInstruction> instStmts = new ArrayList<>();
 
-            for (PyStatement.ArgStatement arg : this.args) {
+            for (ArgStatement arg : this.args) {
                 instArgs.add((PyExecutor.ArgPy) arg.build(builder));
             }
 

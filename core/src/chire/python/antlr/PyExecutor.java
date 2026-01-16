@@ -2,13 +2,15 @@ package chire.python.antlr;
 
 import chire.python.antlr.callable.PyCallable;
 import chire.python.py.PyList;
-import chire.python.py.base.PyObject;
 import chire.python.util.handle.MethodCallHandle;
 import chire.python.util.handle.SubClass;
 import chire.python.util.handle.VarCallHandle;
 import chire.python.util.type.NumberComparator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class PyExecutor {
 

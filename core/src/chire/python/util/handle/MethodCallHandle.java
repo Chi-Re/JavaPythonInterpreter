@@ -1,5 +1,4 @@
 package chire.python.util.handle;
-import chire.python.py.PyList;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

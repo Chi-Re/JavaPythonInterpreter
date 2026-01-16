@@ -3,8 +3,6 @@ package chire.python.antlr.callable;
 import chire.python.antlr.PyExecutor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.function.Function;
 
 public interface PyCallable {
     default Object call(PyExecutor exec, ArrayList<PyExecutor.PyInstruction> arguments) {

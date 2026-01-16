@@ -1,21 +1,13 @@
 package chire.python.util;
 
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
-import net.bytebuddy.implementation.FixedValue;
-import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.bind.annotation.*;
-import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
-import net.bytebuddy.jar.asm.Opcodes;
+import net.bytebuddy.implementation.bind.annotation.AllArguments;
+import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.matcher.ElementMatchers;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 public class Test {
     public static void main(String[] args) throws Exception {

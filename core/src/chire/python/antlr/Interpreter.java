@@ -1,7 +1,6 @@
 package chire.python.antlr;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Interpreter {
     public void interpret(ArrayList<PyExecutor.PyInstruction> executors) {

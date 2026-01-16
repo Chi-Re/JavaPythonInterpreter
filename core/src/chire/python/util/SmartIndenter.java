@@ -1,10 +1,5 @@
 package chire.python.util;
 
-import com.google.common.base.Strings;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 
