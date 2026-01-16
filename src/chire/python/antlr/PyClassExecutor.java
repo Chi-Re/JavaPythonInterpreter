@@ -1,6 +1,7 @@
 package chire.python.antlr;
 
 import chire.python.util.handle.SubClass;
+import chire.python.util.handle.VarCallHandle;
 
 public class PyClassExecutor extends PyExecutor {
     private SubClass subclass;
@@ -13,6 +14,10 @@ public class PyClassExecutor extends PyExecutor {
     public void setVar(String key, Object value) {
         super.setVar(key, value);
         this.subclass.addVariable(key, value);
+    }
+
+    public void setClassVar(String cname, String key, Object value){
+        super.setVar(key, value);
     }
 
     public SubClass getSubClass() {

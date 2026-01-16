@@ -26,13 +26,14 @@ public class PythonInterpreter {
                     a = 2
                 
                     def __init__(self):
-                        self.a = 3
+                        self.a = 7
                         print("aaaaa")
                 
                     def te3(self, key):
                         self.a = key
                 
                 test = Test()
+                test.te3(9)
                 print(test.a)
                 """;
 

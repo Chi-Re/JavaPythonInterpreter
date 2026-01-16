@@ -47,6 +47,15 @@ public class PyExecutor {
         returnState = state;
     }
 
+    @Override
+    public String toString() {
+        return "PyExecutor{" +
+                "locals=" + locals +
+                ", global=" + global +
+                ", returnState=" + returnState +
+                '}';
+    }
+
     public interface PyInstruction{
         Object run(PyExecutor exec);
     }
@@ -117,8 +126,9 @@ public class PyExecutor {
                         argType.add(arg.type);
                     }
 
+                    argType.remove(0);
+
                     if (Objects.equals(((FunPy) b).name, "__init__")) {
-                        argType.remove(0);
                         subclass.addConstructor(argType.toArray(new Class[]{}), (self, arg) -> {
                             return ((PyCallable) b.run(execLocal)).call(execLocal, self, arg);
                         });
@@ -167,10 +177,10 @@ public class PyExecutor {
 
                     execLocal.setGlobal(exec);
 
-                    if (self != null) {
-                        execLocal.setVar(args.get(0).name, self);
-                        args.remove(0);
-                    }
+                    execLocal.setVar(args.get(0).name, new SelfNull(
+                            self != null ? self.toString() : "null"
+                    ));
+                    args.remove(0);
 
                     if (arguments.length != args.size()) {
                         throw new RuntimeException("all args");
@@ -375,6 +385,13 @@ public class PyExecutor {
         @Override
         public Object run(PyExecutor exec) {
             var key = this.key.run(exec);
+
+            if (key instanceof SelfNull) {
+                exec.global.setVar(((VarCallPy) build).name, call.run(exec));
+
+                return null;
+            }
+
             if (this.build instanceof FunCallPy) {
                 throw new RuntimeException("not can key");
             } else if (this.build instanceof VarCallPy) {
