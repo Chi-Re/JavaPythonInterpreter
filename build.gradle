@@ -16,21 +16,6 @@ allprojects {
         mavenCentral()
         maven{ url 'https://www.jitpack.io' }
     }
-
-    tasks.withType(JavaCompile){
-        options.encoding = "UTF-8"
-        options.fork = true
-        options.forkOptions.jvmArgs.addAll([
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-                "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
-        ])
-
-        options.compilerArgs.addAll(['--release', '17'])
-    }
 }
 
 project("core") {
@@ -49,7 +34,7 @@ project("core") {
 
 project("asm") {
     dependencies {
-        implementation 'org.ow2.asm:asm:9.4'
+        api 'org.ow2.asm:asm:9.4'
     }
 }
 
