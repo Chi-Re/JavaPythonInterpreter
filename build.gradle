@@ -16,9 +16,7 @@ allprojects {
         mavenCentral()
         maven{ url 'https://www.jitpack.io' }
     }
-}
 
-project("core") {
     tasks.withType(JavaCompile){
         options.encoding = "UTF-8"
         options.fork = true
@@ -33,7 +31,9 @@ project("core") {
 
         options.compilerArgs.addAll(['--release', '17'])
     }
+}
 
+project("core") {
     dependencies {
         api project(":asm")
 
@@ -48,13 +48,6 @@ project("core") {
 }
 
 project("asm") {
-    tasks.withType(JavaCompile){
-        options.encoding = "UTF-8"
-        options.fork = true
-
-        options.compilerArgs.addAll(['--release', '8'])
-    }
-
     dependencies {
         implementation 'org.ow2.asm:asm:9.4'
     }
